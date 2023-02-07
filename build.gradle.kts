@@ -12,14 +12,12 @@ buildscript {
 
 plugins {
     kotlin("jvm") version "1.8.0"
+    id("maven-publish")
 }
 
 allprojects {
     apply(plugin = "kotlin")
     apply(plugin = "com.github.johnrengelman.shadow")
-    tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
-        archiveFileName.set("${rootProject.name}.jar")
-    }
 
     repositories {
         mavenCentral()
@@ -49,6 +47,7 @@ allprojects {
     tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
         dependsOn(tasks.processResources)
         archiveFileName.set("${rootProject.name}.jar")
+        classifier = null
 
         doLast {
             copy {
@@ -69,6 +68,43 @@ allprojects {
                 }
             }
         }
+    }
+
+    lateinit var sourcesArtifact: PublishArtifact
+
+
+    tasks {
+        artifacts {
+            sourcesArtifact = archives(getByName("shadowJar")) {
+                classifier = null
+            }
+        }
+    }
+
+    apply(plugin = "maven-publish")
+
+    publishing {
+        val repo = System.getenv("GITHUB_REPOSITORY")
+        if (repo === null) return@publishing
+        repositories {
+            maven {
+                url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
+                credentials {
+
+                    username = System.getenv("SONATYPE_USERNAME")
+                    password = System.getenv("SONATYPE_PASSWORD")
+                }
+            }
+        }
+        publications {
+            register<MavenPublication>(project.name) {
+                groupId = "io.github.bruce0203"
+                artifactId = project.name.toLowerCase()
+                version = "0.10.3.3"//System.getenv("GITHUB_BUILD_NUMBER")?: project.version.toString()
+                artifact(sourcesArtifact)
+            }
+        }
+
     }
 
 }
