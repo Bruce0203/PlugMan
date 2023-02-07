@@ -100,7 +100,7 @@ allprojects {
             register<MavenPublication>(project.name) {
                 groupId = "io.github.bruce0203"
                 artifactId = project.name.toLowerCase()
-                version = "0.10.3.3"//System.getenv("GITHUB_BUILD_NUMBER")?: project.version.toString()
+                version = System.getenv("GITHUB_BUILD_NUMBER")?: project.version.toString()
                 artifact(sourcesArtifact)
             }
         }
