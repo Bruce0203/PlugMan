@@ -6,16 +6,17 @@ import lombok.Getter;
 
 public class PlugMan {
 
-    static {
-        try {
-            Class.forName("com.mojang.brigadier.CommandDispatcher");
-            bukkitCommandWrap = new BukkitCommandWrap();
-        } catch (ClassNotFoundException | NoClassDefFoundError e) {
-            bukkitCommandWrap = new BukkitCommandWrap_Useless();
+    private static BukkitCommandWrap bukkitCommandWrap = null;
+
+    public static BukkitCommandWrap getBukkitCommandWrap() {
+        if (bukkitCommandWrap == null) {
+            try {
+                Class.forName("com.mojang.brigadier.CommandDispatcher");
+                bukkitCommandWrap = new BukkitCommandWrap();
+            } catch (ClassNotFoundException | NoClassDefFoundError e) {
+                bukkitCommandWrap = new BukkitCommandWrap_Useless();
+            }
         }
+        return bukkitCommandWrap;
     }
-
-    @Getter
-    public static BukkitCommandWrap bukkitCommandWrap = null;
-
 }
